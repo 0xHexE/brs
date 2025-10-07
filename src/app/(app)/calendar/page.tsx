@@ -459,7 +459,7 @@ export default function StudentCalendarApp() {
         course: newEvent.course,
         location: newEvent.location,
         instructor: newEvent.instructor,
-        color: getEventColor(newEvent.type),
+        color: getEventColor(newEvent.type || 'class'),
         priority: newEvent.priority || 'medium',
         status: 'scheduled',
       };
