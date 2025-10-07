@@ -4,7 +4,11 @@ import { hashPassword } from 'better-auth/crypto';
 import { Command } from 'commander';
 import { PrismaClient } from '../src/generated/prisma';
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  transactionOptions: {
+    timeout: 30000, // 30 seconds timeout
+  },
+});
 const program = new Command();
 
 program
