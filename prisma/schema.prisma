@@ -1,0 +1,164 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String             @id
+  name              String
+  email             String
+  emailVerified     Boolean            @default(false)
+  image             String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @default(now()) @updatedAt
+  sessions          Session[]
+  accounts          Account[]
+  teammembers       TeamMember[]
+  userss            Users[]
+  admission_offerss Admission_offers[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id                   String   @id
+  expiresAt            DateTime
+  token                String
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  ipAddress            String?
+  userAgent            String?
+  userId               String
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activeOrganizationId String?
+  activeTeamId         String?
+
+  @@unique([token])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+
+  @@map("verification")
+}
+
+model Course_groups {
+  id             String       @id
+  name           String
+  organizationId String
+  universities   Universities @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime
+  updatedAt      DateTime?    @updatedAt
+  courseCode     String
+  courseTitle    String
+  creditHours    Int
+  semester       String
+  lecturerId     String?
+  labSection     String?
+  teammembers    TeamMember[]
+
+  @@map("course_groups")
+}
+
+model TeamMember {
+  id            String        @id
+  teamId        String
+  course_groups Course_groups @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime?
+
+  @@map("teamMember")
+}
+
+model Universities {
+  id                String             @id
+  name              String
+  code              String
+  logo              String?
+  createdAt         DateTime
+  metadata          String?
+  faculty           String
+  department        String
+  programme         String
+  degreeType        String
+  studyYear         Int?
+  intakeSeason      String?
+  accreditation     String?
+  course_groupss    Course_groups[]
+  userss            Users[]
+  admission_offerss Admission_offers[]
+
+  @@unique([code])
+  @@map("universities")
+}
+
+model Users {
+  id              String       @id
+  organizationId  String
+  universities    Universities @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role            String
+  createdAt       DateTime
+  fullName        String
+  universityId    String?
+  nationalId      String?
+  admissionYear   Int?
+  currentSemester Int?
+  cgpa            Int?
+  employeeNo      String?
+  academicRank    String?
+
+  @@unique([universityId])
+  @@map("users")
+}
+
+model Admission_offers {
+  id             String       @id
+  organizationId String
+  universities   Universities @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  email          String
+  role           String?
+  teamId         String?
+  status         String
+  expiresAt      DateTime
+  inviterId      String
+  user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+  intendedRole   String
+  programme      String
+  admissionType  String?
+
+  @@map("admission_offers")
+}
